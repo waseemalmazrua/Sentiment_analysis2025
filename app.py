@@ -57,25 +57,39 @@ if uploaded_file:
         plt.xticks(rotation=0)
         st.pyplot(fig)
 
-     # زر تحميل CSV
-csv = df.to_csv(index=False).encode('utf-8-sig')
-st.download_button("⬇️ تحميل النتائج بصيغة CSV", data=csv, file_name="نتائج_تحليل.csv", mime="text/csv")
+from io import BytesIO
 
-# تنبيه مهم حول تشوه النص العربي
-st.warning("📌 ملاحظة: إذا فتحت ملف CSV في Excel وظهرت الأحرف العربية مشوهة، افتح الملف من داخل Excel باستخدام خيار الترميز (Unicode UTF-8).")
+# زر تحميل CSV
+csv = df.to_csv(index=False).encode('utf-8-sig')
+st.download_button(
+    label="⬇️ تحميل النتائج بصيغة CSV",
+    data=csv,
+    file_name="نتائج_تحليل.csv",
+    mime="text/csv"
+)
+
+# تنبيه للمستخدم حول مشكلة الترميز في Excel
+st.markdown("""
+<div style="color: #d97706; background-color: #fff7ed; border: 1px solid #facc15; padding: 10px; border-radius: 5px;">
+📌 <strong>ملاحظة:</strong> إذا ظهرت الأحرف العربية مشوهة عند فتح ملف CSV في Excel، يُفضل فتح الملف من داخل Excel باستخدام خيار الترميز <code>Unicode (UTF-8)</code>:
+<br>من داخل Excel: بيانات → من نص/CSV → اختر الترميز الصحيح.
+</div>
+""", unsafe_allow_html=True)
 
 # زر تحميل Excel
 excel_buffer = BytesIO()
 with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
     df.to_excel(writer, index=False, sheet_name="النتائج")
+
 excel_buffer.seek(0)
 
 st.download_button(
-    "⬇️ تحميل النتائج بصيغة Excel",
+    label="⬇️ تحميل النتائج بصيغة Excel",
     data=excel_buffer.getvalue(),
     file_name="نتائج_تحليل.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
 
 
 
