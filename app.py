@@ -32,7 +32,7 @@ if uploaded_file:
             st.error("❌ الملف فارغ أو لا يحتوي على بيانات نصية.")
             st.stop()
 
-        # تحميل النموذج العربي من Hugging Face
+        # تحميل النموذج
         model_name = "CAMeL-Lab/bert-base-arabic-camelbert-da-sentiment"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForSequenceClassification.from_pretrained(model_name)
@@ -48,7 +48,7 @@ if uploaded_file:
         st.success("✅ تم التحليل بنجاح، النتائج أدناه:")
         st.dataframe(df)
 
-        # رسم بياني (labels بالإنجليزية عشان الخط العربي)
+        # رسم بياني
         st.markdown("###  Sentiment Distribution:")
         fig, ax = plt.subplots()
         df["تصنيف المشاعر"].value_counts().plot(kind='bar', ax=ax, color=['green', 'red', 'gray'])
@@ -57,45 +57,35 @@ if uploaded_file:
         plt.xticks(rotation=0)
         st.pyplot(fig)
 
-from io import BytesIO
+        # 🔶 تنبيه حول الترميز في CSV
+        st.markdown("""
+        <div style="color: #d97706; background-color: #fff7ed; border: 1px solid #facc15; padding: 10px; border-radius: 5px;">
+        📌 <strong>ملاحظة:</strong> إذا ظهرت الأحرف العربية مشوهة عند فتح ملف CSV في Excel، يُفضل فتح الملف من داخل Excel باستخدام خيار الترميز <code>Unicode (UTF-8)</code>:
+        <br>من داخل Excel: بيانات → من نص/CSV → اختر الترميز الصحيح.
+        </div>
+        """, unsafe_allow_html=True)
 
-# زر تحميل CSV
-csv = df.to_csv(index=False).encode('utf-8-sig')
-st.download_button(
-    label="⬇️ تحميل النتائج بصيغة CSV",
-    data=csv,
-    file_name="نتائج_تحليل.csv",
-    mime="text/csv"
-)
+        # زر تحميل CSV
+        csv = df.to_csv(index=False).encode('utf-8-sig')
+        st.download_button("⬇️ تحميل النتائج بصيغة CSV", data=csv, file_name="نتائج_تحليل.csv", mime="text/csv")
 
-# تنبيه للمستخدم حول مشكلة الترميز في Excel
-st.markdown("""
-<div style="color: #d97706; background-color: #fff7ed; border: 1px solid #facc15; padding: 10px; border-radius: 5px;">
-📌 <strong>ملاحظة:</strong> إذا ظهرت الأحرف العربية مشوهة عند فتح ملف CSV في Excel، يُفضل فتح الملف من داخل Excel باستخدام خيار الترميز <code>Unicode (UTF-8)</code>:
-<br>من داخل Excel: بيانات → من نص/CSV → اختر الترميز الصحيح.
-</div>
-""", unsafe_allow_html=True)
+        # زر تحميل Excel
+        excel_buffer = BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name="النتائج")
+        excel_buffer.seek(0)
 
-# زر تحميل Excel
-excel_buffer = BytesIO()
-with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
-    df.to_excel(writer, index=False, sheet_name="النتائج")
-
-excel_buffer.seek(0)
-
-st.download_button(
-    label="⬇️ تحميل النتائج بصيغة Excel",
-    data=excel_buffer.getvalue(),
-    file_name="نتائج_تحليل.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
-
-
-
+        st.download_button(
+            label="⬇️ تحميل النتائج بصيغة Excel",
+            data=excel_buffer.getvalue(),
+            file_name="نتائج_تحليل.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
     except Exception as e:
         st.error(f"❌ حدث خطأ أثناء تحليل الملف: {e}")
-# توقيع شخصي بسيط في أسفل الصفحة
+
+# توقيع شخصي
 st.markdown("""---""")
 st.markdown("""
 <div style="text-align: center; font-size: 14px; color: gray;">
