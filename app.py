@@ -61,14 +61,15 @@ if uploaded_file:
         csv = df.to_csv(index=False).encode('utf-8-sig')
         st.download_button("⬇️ تحميل النتائج بصيغة CSV", data=csv, file_name="نتائج_تحليل.csv", mime="text/csv")
 
-        # زر تحميل Excel
         excel_buffer = BytesIO()
-        with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
-            df.to_excel(writer, index=False, sheet_name="النتائج")
-            writer.save()
-        st.download_button("⬇️ تحميل النتائج بصيغة Excel", data=excel_buffer.getvalue(),
-                           file_name="نتائج_تحليل.xlsx",
-                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+    df.to_excel(writer, index=False, sheet_name="النتائج")
+excel_buffer.seek(0)  # إضافة مهمة للتأكد من قراءة الملف من البداية
+
+st.download_button("⬇️ تحميل النتائج بصيغة Excel", data=excel_buffer.getvalue(),
+                   file_name="نتائج_تحليل.xlsx",
+                   mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
 
     except Exception as e:
         st.error(f"❌ حدث خطأ أثناء تحليل الملف: {e}")
