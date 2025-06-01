@@ -57,18 +57,26 @@ if uploaded_file:
         plt.xticks(rotation=0)
         st.pyplot(fig)
 
-        # زر تحميل CSV
-        csv = df.to_csv(index=False).encode('utf-8-sig')
-        st.download_button("⬇️ تحميل النتائج بصيغة CSV", data=csv, file_name="نتائج_تحليل.csv", mime="text/csv")
+     # زر تحميل CSV
+csv = df.to_csv(index=False).encode('utf-8-sig')
+st.download_button("⬇️ تحميل النتائج بصيغة CSV", data=csv, file_name="نتائج_تحليل.csv", mime="text/csv")
 
-        excel_buffer = BytesIO()
-        with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, sheet_name="النتائج")
-        excel_buffer.seek(0)  # إضافة مهمة للتأكد من قراءة الملف من البداية
+# تنبيه مهم حول تشوه النص العربي
+st.warning("📌 ملاحظة: إذا فتحت ملف CSV في Excel وظهرت الأحرف العربية مشوهة، افتح الملف من داخل Excel باستخدام خيار الترميز (Unicode UTF-8).")
 
-        st.download_button("⬇️ تحميل النتائج بصيغة Excel", data=excel_buffer.getvalue(),
-                   file_name="نتائج_تحليل.xlsx",
-                   mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+# زر تحميل Excel
+excel_buffer = BytesIO()
+with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+    df.to_excel(writer, index=False, sheet_name="النتائج")
+excel_buffer.seek(0)
+
+st.download_button(
+    "⬇️ تحميل النتائج بصيغة Excel",
+    data=excel_buffer.getvalue(),
+    file_name="نتائج_تحليل.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
 
 
     except Exception as e:
